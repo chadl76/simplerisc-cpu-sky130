@@ -1,0 +1,21 @@
+# LibreLane config for the SimpleRisc CPU (ASIC version, loadable program memory)
+DESIGN_NAME: cpu                  # the TOP module name (in cpu.v)
+VERILOG_FILES:                    # every Verilog file the CPU needs (NOT zybo_top.v)
+  - dir::../rtl/cpu.v
+  - dir::../rtl/if_stage.v
+  - dir::../rtl/of_stage.v
+  - dir::../rtl/regFile.v
+  - dir::../rtl/immgen.v
+  - dir::../rtl/branchTarget.v
+  - dir::../rtl/control_unit.v
+  - dir::../rtl/ex_stage.v
+  - dir::../rtl/alu.v
+  - dir::../rtl/flag.v
+  - dir::../rtl/ma_stage.v
+  - dir::../rtl/rw_stage.v
+CLOCK_PORT: clk                   # which input is the clock
+CLOCK_PERIOD: 200                 # ns -> 5 MHz to start (single-cycle + 32-bit divider = long path); tighten after run 1
+PDK: sky130A                      # SkyWater 130 nm
+STD_CELL_LIBRARY: sky130_fd_sc_hd # the standard-cell library (the prebuilt cells)
+FP_CORE_UTIL: 40                  # fill 40% of the core with cells (room to route)
+IO_DELAY_CONSTRAINT: 5            # assume inputs/outputs use 5% of the clock outside the chip
