@@ -152,4 +152,4 @@ docs/   pictures, IEEE-style report, slides
 
 ## Author
 
-Chad Lucas, B.S. Electrical Engineering, University of North Dakota
+Chad Lucas
