@@ -18,13 +18,53 @@ The top level wires the five stages (IF, OF, EX, MA, RW) and the control unit to
 
 ![Logisim top-level CPU](docs/logisim_cpu.png)
 
+### Inside the blocks
+
+**Operand Fetch (OF):** splits the 32-bit instruction into its fields (opcode, rd, rs1, rs2), reads two registers from the register file, and builds the sign-extended immediate and the branch target.
+
+![OF stage](docs/logisim/of_stage.png)
+
+**Execute (EX):** the ALU does the math, a mux picks register or immediate for operand B, and the stored compare flags (E, GT) decide whether a branch is taken.
+
+![EX stage](docs/logisim/ex_stage.png)
+
+<details>
+<summary><b>Click to see the rest of the subcircuits</b> (IF, register file, control unit, ALU, flags, MA, RW)</summary>
+
+**Instruction Fetch (IF)**
+![IF stage](docs/logisim/if_stage.png)
+
+**Register file:** 16 registers, two 16-to-1 muxes for the two read ports
+![Register file](docs/logisim/register_file.png)
+
+**Control unit:** turns the opcode into the control signals
+![Control unit](docs/logisim/control_unit.png)
+
+**ALU**
+![ALU](docs/logisim/alu.png)
+
+**Flags:** two flip-flops that hold E and GT from `cmp` until the branch uses them
+![Flags](docs/logisim/flags.png)
+
+**Memory Access (MA)**
+![MA stage](docs/logisim/ma_stage.png)
+
+**Register Writeback (RW)**
+![RW stage](docs/logisim/rw_stage.png)
+
+</details>
+
+### Result
+
 After running the factorial program, register `r1` holds 10! = 3,628,800:
 
 <img src="docs/logisim_result.png" width="320" alt="Logisim result: r1 = 3628800">
 
 ## 2. Verilog on FPGA
 
-Each Logisim block became a Verilog module ([`rtl/`](rtl/)). On the Digilent FPGA board, pressing a button runs the program, and `r1` is drawn over HDMI as a 32-bit binary number (white = 1):
+Each Logisim block became a Verilog module ([`rtl/`](rtl/)). On a Digilent Zybo Z7 FPGA board, pressing a button runs the program, and `r1` is drawn over HDMI as a 32-bit binary number (white = 1):
+
+![Pressing the button on the Zybo and the result appearing over HDMI](docs/fpga_demo.gif)
 
 ![FPGA HDMI output showing 10! in binary](docs/fpga_hdmi_result.png)
 
@@ -40,9 +80,11 @@ Each Logisim block became a Verilog module ([`rtl/`](rtl/)). On the Digilent FPG
 | Standard cells | ~16.8k (logic, excluding fill/tap) |
 | Die size | 563 × 573 µm |
 | Power (typical) | ~24 mW |
+| Magic DRC / KLayout DRC | 0 / 0 |
 | LVS | Pass |
 | Antenna | Pass |
 
+Full numbers are in [`asic/results/metrics.json`](asic/results/metrics.json) and the sign-off summary in [`asic/results/manufacturability.rpt`](asic/results/manufacturability.rpt). The final layout is [`asic/results/cpu.gds.gz`](asic/results/cpu.gds.gz) (gzipped, open with KLayout after `gunzip`).
 
 The large setup slack means the design would close at a much faster clock. Tightening the constraint is the next step.
 
@@ -110,4 +152,4 @@ docs/   pictures, IEEE-style report, slides
 
 ## Author
 
-Chad Lucas
+Chad Lucas, B.S. Electrical Engineering, University of North Dakota
