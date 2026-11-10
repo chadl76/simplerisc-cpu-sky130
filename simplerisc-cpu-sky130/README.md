@@ -40,11 +40,9 @@ Each Logisim block became a Verilog module ([`rtl/`](rtl/)). On the Digilent FPG
 | Standard cells | ~16.8k (logic, excluding fill/tap) |
 | Die size | 563 × 573 µm |
 | Power (typical) | ~24 mW |
-| Magic DRC / KLayout DRC | 0 / 0 |
 | LVS | Pass |
 | Antenna | Pass |
 
-Full numbers are in [`asic/results/metrics.json`](asic/results/metrics.json) and the sign-off summary in [`asic/results/manufacturability.rpt`](asic/results/manufacturability.rpt). The final layout is [`asic/results/cpu.gds.gz`](asic/results/cpu.gds.gz) (gzipped, open with KLayout after `gunzip`).
 
 The large setup slack means the design would close at a much faster clock. Tightening the constraint is the next step.
 
@@ -112,4 +110,4 @@ docs/   pictures, IEEE-style report, slides
 
 ## Author
 
-Chad Lucas, B.S. Electrical Engineering, University of North Dakota
+Chad Lucas
