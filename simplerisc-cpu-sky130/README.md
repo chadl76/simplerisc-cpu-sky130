@@ -1,10 +1,36 @@
-# 32-Bit SimpleRisc CPU — RTL to GDS on SkyWater 130 nm
+# 32-Bit SimpleRisc CPU — Logisim → Verilog → FPGA → SkyWater 130 nm
 
-A single-cycle, five-stage 32-bit processor for the SimpleRisc ISA (21 instructions), designed first in Logisim, rewritten in Verilog, verified by running a factorial program, and taken through the open-source LibreLane flow to a **DRC-, LVS- and antenna-clean** layout in the SkyWater 130 nm process.
+A single-cycle, five-stage 32-bit processor for the SimpleRisc ISA (21 instructions). I built it three ways:
+
+1. **Logisim:** the full datapath and control unit, drawn gate by gate
+2. **Verilog:** ported and run on a Digilent FPGA, with the result shown over HDMI
+3. **Silicon layout:** taken through the open-source LibreLane flow to a **DRC-, LVS- and antenna-clean** layout in the SkyWater 130 nm process
+
+All three run the same test program, which computes **10! = 3,628,800**.
 
 ![CPU layout on Sky130](docs/layout.png)
 
-## Results (LibreLane, sky130A, sky130_fd_sc_hd)
+---
+
+## 1. Logisim design
+
+The top level wires the five stages (IF, OF, EX, MA, RW) and the control unit together. Each block is its own subcircuit.
+
+![Logisim top-level CPU](docs/logisim_cpu.png)
+
+After running the factorial program, register `r1` holds 10! = 3,628,800:
+
+<img src="docs/logisim_result.png" width="320" alt="Logisim result: r1 = 3628800">
+
+## 2. Verilog on FPGA
+
+Each Logisim block became a Verilog module ([`rtl/`](rtl/)). On the Digilent FPGA board, pressing a button runs the program, and `r1` is drawn over HDMI as a 32-bit binary number (white = 1):
+
+![FPGA HDMI output showing 10! in binary](docs/fpga_hdmi_result.png)
+
+`0000 0000 0011 0111 0101 1111 0000 0000` = `0x00375F00` = **3,628,800**
+
+## 3. ASIC layout (LibreLane, sky130A, sky130_fd_sc_hd)
 
 | Metric | Value |
 |---|---|
@@ -21,6 +47,10 @@ A single-cycle, five-stage 32-bit processor for the SimpleRisc ISA (21 instructi
 Full numbers are in [`asic/results/metrics.json`](asic/results/metrics.json) and the sign-off summary in [`asic/results/manufacturability.rpt`](asic/results/manufacturability.rpt). The final layout is [`asic/results/cpu.gds.gz`](asic/results/cpu.gds.gz) (gzipped, open with KLayout after `gunzip`).
 
 The large setup slack means the design would close at a much faster clock. Tightening the constraint is the next step.
+
+**ASIC note:** the hardware divider (`div`, `mod`) was removed from the ALU for the silicon version. A 32-bit combinational divider dominated area and the critical path.
+
+---
 
 ## Architecture
 
@@ -39,11 +69,9 @@ Top level: [`rtl/cpu.v`](rtl/cpu.v). The program memory can be loaded through `p
 
 ![SimpleRisc instruction formats](docs/instruction_formats.png)
 
-**ASIC note:** the hardware divider (`div`, `mod`) was removed from the ALU for the silicon version. A 32-bit combinational divider dominated area and the critical path.
+## Test program
 
-## Verification
-
-[`tb/tb_cpu.v`](tb/tb_cpu.v) loads a factorial program into instruction memory, runs it, and checks the registers, RAM and final PC:
+[`tb/tb_cpu.v`](tb/tb_cpu.v) loads this program, runs it, and checks the registers, RAM and final PC:
 
 ```
 mov r0, 10        ; n
@@ -56,8 +84,6 @@ loop: mul r1, r1, r2
 st  r1, 5[r2]     ; store the answer
 b   0             ; halt
 ```
-
-Expected result: `r1 = 10! = 3,628,800 (0x00375F00)`.
 
 ## How to run
 
@@ -76,8 +102,13 @@ librelane config.yaml
 rtl/    Verilog source (12 modules)
 tb/     factorial testbench
 asic/   LibreLane config + sign-off results and final GDS
-docs/   layout screenshot, instruction formats, IEEE-style report, slides
+docs/   pictures, IEEE-style report, slides
 ```
+
+## Next steps
+
+- Pipeline the five stages so each works on a different instruction
+- Tighten the clock constraint toward the real critical path
 
 ## Author
 
